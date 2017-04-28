@@ -22,7 +22,6 @@
 #include <linux/hdmi-notifier.h>
 #include <linux/mutex.h>
 #include <linux/of_device.h>
-#include <linux/platform_data/dw_hdmi-cec.h>
 #include <linux/spinlock.h>
 
 #include <drm/drm_of.h>
@@ -39,8 +38,9 @@
 
 #include "dw-hdmi.h"
 #include "dw-hdmi-audio.h"
+#include "dw-hdmi-cec.h"
 
-#define HDMI_EDID_LEN		512
+#define HDMI_EDID_LEN		128*257
 #define DDC_SEGMENT_ADDR       0x30
 
 #define RGB			0
@@ -1731,8 +1731,8 @@ static void dw_hdmi_enable_video_path(struct dw_hdmi *hdmi)
 
 	/* Enable pixel repetition path */
 	if (hdmi->hdmi_data.video_mode.mpixelrepetitioninput) {
-		clkdis &= ~HDMI_MC_CLKDIS_PREPCLK_DISABLE;
-		hdmi_writeb(hdmi, clkdis, HDMI_MC_CLKDIS);
+		hdmi->mc_clkdis &= ~HDMI_MC_CLKDIS_PREPCLK_DISABLE;
+		hdmi_writeb(hdmi, hdmi->mc_clkdis, HDMI_MC_CLKDIS);
 	}
 }
 
@@ -2049,7 +2049,7 @@ static int dw_hdmi_connector_get_modes(struct drm_connector *connector)
 		hdmi->sink_is_hdmi = drm_detect_hdmi_monitor(edid);
 		hdmi->sink_has_audio = drm_detect_monitor_audio(edid);
 		drm_mode_connector_update_edid_property(connector, edid);
-		hdmi_event_new_edid(hdmi->n, edid, 0);
+		hdmi_event_new_edid(hdmi->n, edid, (edid->extensions+1)*128);
 		ret = drm_add_edid_modes(connector, edid);
 		/* Store the ELD */
 		drm_edid_to_eld(connector, edid);
@@ -2309,7 +2309,7 @@ static const struct dw_hdmi_reg_table hdmi_reg_table[] = {
 	{HDMI_A_HDCPCFG0, 0x52bb},
 	{0x7800, 0x7818},
 	{0x7900, 0x790e},
-	{HDMI_CEC_CTRL, HDMI_CEC_WKUPCTRL},
+	{0x7d00, 0x7d31},
 	{HDMI_I2CM_SLAVE, 0x7e31},
 };
 
@@ -2438,18 +2438,14 @@ static void dw_hdmi_register_debugfs(struct device *dev, struct dw_hdmi *hdmi)
 			    hdmi, &dw_hdmi_phy_fops);
 }
 
-static void dw_hdmi_cec_enable(void *data)
+static void dw_hdmi_cec_enable(struct dw_hdmi *hdmi)
 {
-	struct dw_hdmi *hdmi = data;
-
 	hdmi->mc_clkdis &= ~HDMI_MC_CLKDIS_CECCLK_DISABLE;
 	hdmi_writeb(hdmi, hdmi->mc_clkdis, HDMI_MC_CLKDIS);
 }
 
-static void dw_hdmi_cec_disable(void *data)
+static void dw_hdmi_cec_disable(struct dw_hdmi *hdmi)
 {
-	struct dw_hdmi *hdmi = data;
-
 	hdmi->mc_clkdis |= HDMI_MC_CLKDIS_CECCLK_DISABLE;
 	hdmi_writeb(hdmi, hdmi->mc_clkdis, HDMI_MC_CLKDIS);
 }
@@ -2667,16 +2663,17 @@ int dw_hdmi_bind(struct device *dev, struct device *master,
 		hdmi->audio = platform_device_register_full(&pdevinfo);
 	}
 
-	cec.base = hdmi->regs;
 	cec.irq = irq;
 	cec.ops = &dw_hdmi_cec_ops;
-	cec.ops_data = hdmi;
+	cec.hdmi = hdmi;
+	cec.write = hdmi_writeb;
+	cec.read = hdmi_readb;
+	cec.mod	= hdmi_modb;
 
 	pdevinfo.name = "dw-hdmi-cec";
 	pdevinfo.data = &cec;
 	pdevinfo.size_data = sizeof(cec);
 	pdevinfo.dma_mask = 0;
-
 	hdmi->cec = platform_device_register_full(&pdevinfo);
 
 	dev_set_drvdata(dev, hdmi);
