@@ -1454,6 +1454,7 @@ void __weak rk_devinfo_get_eth_mac(u8 *mac)
 
 void rk_get_eth_addr(void *priv, unsigned char *addr)
 {
+	u32 id;
 	int ret;
 	struct rk_priv_data *bsp_priv = priv;
 	struct device *dev = &bsp_priv->pdev->dev;
@@ -1462,15 +1463,18 @@ void rk_get_eth_addr(void *priv, unsigned char *addr)
 	if (is_valid_ether_addr(addr))
 		goto out;
 
-	ret = rk_vendor_read(LAN_MAC_ID, addr, 6);
-	if (ret != 6 || is_zero_ether_addr(addr)) {
+	/* use vendor storage id 7 for integrated phy */
+	id = bsp_priv->integrated_phy ? 7 : LAN_MAC_ID;
+
+	ret = rk_vendor_read(id, addr, 6);
+	if (ret != 6 || !is_valid_ether_addr(addr)) {
 		dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)",
 					__func__, ret);
 		random_ether_addr(addr);
 		dev_err(dev, "%s: generate random eth mac address: %02x:%02x:%02x:%02x:%02x:%02x",
 					__func__, addr[0], addr[1], addr[2],
 					addr[3], addr[4], addr[5]);
-		ret = rk_vendor_write(LAN_MAC_ID, addr, 6);
+		ret = rk_vendor_write(id, addr, 6);
 		if (ret != 0)
 			dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)",
 					__func__, ret);
