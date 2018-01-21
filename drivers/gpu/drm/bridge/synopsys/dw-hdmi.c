@@ -1857,7 +1857,7 @@ static void hdmi_config_hdr_infoframe(struct dw_hdmi *hdmi)
 		return;
 	}
 
-	hdmi_writeb(hdmi, 1, HDMI_FC_DRM_HB0);
+	hdmi_writeb(hdmi, frame.version, HDMI_FC_DRM_HB0);
 	hdmi_writeb(hdmi, frame.length, HDMI_FC_DRM_HB1);
 	hdmi_writeb(hdmi, frame.eotf, HDMI_FC_DRM_PB0);
 	hdmi_writeb(hdmi, frame.metadata_type, HDMI_FC_DRM_PB1);
