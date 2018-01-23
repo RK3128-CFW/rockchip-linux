@@ -2362,11 +2362,11 @@ static void vcodec_set_freq_rk3328(struct vpu_service_info *pservice,
 					       400 * MHZ, EVENT_ADJUST);
 		} else {
 			if (rkv_dec_get_fmt(reg->reg) == FMT_H264D)
-				rkvdec_set_clk(pservice, 400 * MHZ, 300 * MHZ,
-					       400 * MHZ, EVENT_ADJUST);
+				rkvdec_set_clk(pservice, 600 * MHZ, 300 * MHZ,
+					       300 * MHZ, EVENT_ADJUST);
 			else
-				rkvdec_set_clk(pservice, 500 * MHZ, 300 * MHZ,
-					       400 * MHZ, EVENT_ADJUST);
+				rkvdec_set_clk(pservice, 600 * MHZ, 300 * MHZ,
+					       300 * MHZ, EVENT_ADJUST);
 		}
 	}
 }
