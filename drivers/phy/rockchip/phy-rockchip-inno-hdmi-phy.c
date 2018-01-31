@@ -411,16 +411,16 @@ static u32 inno_hdmi_phy_get_tmdsclk(struct inno_hdmi_phy *inno, int rate)
 		tmdsclk = rate / 2;
 		break;
 	case 5:
-		tmdsclk = rate * 5 / 8;
+		tmdsclk = (uint64_t)rate * 5 / 8;
 		break;
 	case 6:
-		tmdsclk = rate * 3 / 4;
+		tmdsclk = (uint64_t)rate * 3 / 4;
 		break;
 	case 10:
-		tmdsclk = rate * 5 / 4;
+		tmdsclk = (uint64_t)rate * 5 / 4;
 		break;
 	case 12:
-		tmdsclk = rate * 3 / 2;
+		tmdsclk = (uint64_t)rate * 3 / 2;
 		break;
 	case 16:
 		tmdsclk = rate * 2;
