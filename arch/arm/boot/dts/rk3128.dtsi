@@ -113,18 +113,8 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	vop_out_dsi: endpoint@0 {
-		reg = <0>;
-		remote-endpoint = <&dsi_in_vop>;
-	};
-
-	vop_out_lvds: endpoint@1 {
-		reg = <1>;
-		remote-endpoint = <&lvds_in_vop>;
-	};
-
-	vop_out_hdmi: endpoint@2 {
-		reg = <2>;
+	vop_out_hdmi: endpoint@3 {
+		reg = <3>;
 		remote-endpoint = <&hdmi_in_vop>;
 	};
 };
