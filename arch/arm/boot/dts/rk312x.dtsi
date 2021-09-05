@@ -479,6 +479,8 @@
 		reg = <0x10104440 0x40>, <0x10104480 0x40>;
 		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "hevc_mmu";
+		clocks = <&cru SCLK_HEVC_CORE>;
+		clock-names = "sclk";
 		power-domains = <&power RK3128_PD_VIDEO>;
 		#iommu-cells = <0>;
 		status = "disabled";
@@ -614,6 +616,7 @@
 		reset-names = "axi", "ahb", "dclk";
 		iommus = <&vop_mmu>;
 		power-domains = <&power RK3128_PD_VIO>;
+		rockchip,grf = <&grf>;
 		status = "disabled";
 
 		vop_out: port {
