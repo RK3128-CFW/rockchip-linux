@@ -525,6 +525,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3126-evb.dtb \
 	rk3126-linux.dtb \
 	rk3128-fireprime.dtb \
+	rk3128-wx8.dtb \
 	rk3128h-box.dtb \
 	rk3128h-box-avb.dtb \
 	rk3128h-evb-linux.dtb \
