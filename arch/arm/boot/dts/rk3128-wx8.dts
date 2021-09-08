@@ -143,7 +143,7 @@
 		simple-audio-card,format = "i2s";
 		simple-audio-card,mclk-fs = <0x100>;
 		simple-audio-card,name = "rockchip,rk312x-codec";
-		simple-audio-card,routing = "Headphone Jack", "TX";
+		simple-audio-card,routing = "Headphone Jack", "HiFi Playback";
 		simple-audio-card,widgets = "Headphone", "Headphone Jack";
 
 		simple-audio-card,dai-link@0 {
@@ -561,7 +561,7 @@
 	cap-sd-highspeed;
 
 	clock-frequency = <37500000>;
-	max-frequency = <50000000>;
+	max-frequency = <37500000>;
 	num-slots = <1>;
 
 //	bus-width = <1>;
