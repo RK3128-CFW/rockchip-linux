@@ -563,8 +563,6 @@
 	clock-frequency = <37500000>;
 	max-frequency = <37500000>;
 	num-slots = <1>;
-
-//	bus-width = <1>;
 };
 
 &u2phy {
@@ -600,7 +598,6 @@
 
 &video_phy {
 	status = "okay";
-	//inno,lanes = <2>;
 };
 
 &pwm0 {
@@ -628,7 +625,10 @@
 	i2c-scl-falling-time-ns = <0x0b>;
 	i2c-scl-rising-time-ns = <0x109>;
 
-	// unknown driver i2ckey@4c { compatible = "i2c0"; }
+	i2cjoy@4c {
+		compatible = "wx8joy";
+		reg = <0x4c>;
+	};
 };
 
 
