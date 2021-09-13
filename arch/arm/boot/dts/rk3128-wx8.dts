@@ -16,6 +16,7 @@
 
 	chosen {
 		stdout-path = &uart0;
+		bootargs = "earlycon=uart8250,mmio32,0x20060000 rootwait console=ttyFIQ0,115200n8 loglevel=7 swiotlb=1 root=PARTUUID=fd800c6c-2fdb-4502-82cb-e61f66b9a221";
 	};
 
 	vcc_io: vcc-io {
@@ -132,7 +133,7 @@
 		#size-cells = <0x01>;
 		ranges;
 
-		drm-logo@00000000 {
+		drm_logo: drm-logo@00000000 {
 			compatible = "rockchip,drm-logo";
 			reg = <0x00 0x00>;
 		};
@@ -377,6 +378,7 @@
 
 &display_subsystem {
 	status = "okay";
+	logo-memory-region = <&drm_logo>;
 
 	route {
 		route_dsi: route-dsi {
