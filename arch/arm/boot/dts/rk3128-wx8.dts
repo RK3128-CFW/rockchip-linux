@@ -399,7 +399,7 @@
 &dmc {
 	status = "okay";
 	center-supply = <&vdd_log>;
-	// vop-dclk-mode = <1>;
+	vop-dclk-mode = <1>;
 };
 
 &soc_thermal {
