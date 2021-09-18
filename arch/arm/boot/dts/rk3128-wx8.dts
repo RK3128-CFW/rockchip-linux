@@ -250,20 +250,6 @@
 			linux,code = <0x2c>;
 		};
 
-		f9 {
-			debounce-interval = <20>;
-			gpios = <&gpio0 0x1e 0x01>;
-			label = "GPIO Key D";
-			linux,code = <32>;
-		};
-
-		f10 {
-			debounce-interval = <20>;
-			gpios = <&gpio0 0x03 0x01>;
-			label = "GPIO Key F";
-			linux,code = <33>;
-		};
-
 		left {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x08 0x01>;
@@ -678,8 +664,6 @@
 					 RK_GPIO3 0x1b 0x00 &pcfg_pull_default
 					 RK_GPIO1 0x01 0x00 &pcfg_pull_default
 					 RK_GPIO1 0x02 0x00 &pcfg_pull_default
-					 RK_GPIO0 0x1e 0x00 &pcfg_pull_none
-					 RK_GPIO0 0x03 0x00 &pcfg_pull_default
 					 >;
 		};
 	};
