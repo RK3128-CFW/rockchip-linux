@@ -19,16 +19,7 @@
 		bootargs = "earlycon=uart8250,mmio32,0x20060000 rootwait console=ttyFIQ0,115200n8 loglevel=7 swiotlb=1 root=PARTUUID=fd800c6c-2fdb-4502-82cb-e61f66b9a221";
 	};
 
-	vcc_io: vcc-io {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc_io";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		regulator-always-on;
-		regulator-boot-on;
-	};
-
-	vcc_sys: vcc-sys {
+	vcc_sys: vcc-sys {	// from USB OTG or from battery
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_sys";
 		regulator-always-on;
@@ -37,14 +28,14 @@
 		regulator-max-microvolt = <5000000>;
 	};
 
-	vcc_lcd: vcc-lcd {
+	vcc_io: vcc-io {
 		compatible = "regulator-fixed";
-		regulator-name = "vcc_lcd";
-		regulator-always-on;
-		regulator-boot-on;
+		regulator-name = "vcc_io";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		vin-supply = <&vcc_io>;
+		regulator-always-on;
+		regulator-boot-on;
+		vin-supply = <&vcc_sys>;
 	};
 
 	vdd_arm: vdd-arm {
@@ -300,6 +291,26 @@
 		};
 	};
 
+	power-supply {
+		compatible = "wx8-charger";
+
+		pinctrl-0 = <&chg_ok &chg_led &dc_det_gpio &host_drv_gpio1 &host_drv_gpio2>;
+		pinctrl-names = "default";
+
+		//chg_en RK_GPIO3 0x11
+		dc_det_gpio = <&gpio0 0x11 GPIO_ACTIVE_HIGH>;
+		chg_ok_gpio = <&gpio3 0x1a GPIO_ACTIVE_LOW>;
+		led_power_gpio = <&gpio1 0x07 GPIO_ACTIVE_LOW>;
+		//host_drv_gpio1 = <&gpio3 0x15 0x00>;
+		usb_boost_gpio = <&gpio1 0x09 GPIO_ACTIVE_HIGH>;
+
+		io-channels = <&saradc 2>;
+		ref_voltage = <3300>; 	// from saradc -> vref-supply -> ?
+		voltage_divider = <200 200>; 	// adc resistot divider
+		discharge_table = <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4205>;
+		charge_table = <3400 3603 3706 3750 3773 3790 3825 4905 3997 4094 4205>;
+		design_capacity = <3000>;
+	};
 };
 
 &cpu0 {
@@ -463,7 +474,7 @@
 	panel@0 {
 		compatible = "simple-panel-dsi";
 		reg = <0x00>;
-		power-supply = <&vcc_lcd>;
+		power-supply = <&vcc_io>;
 		backlight = <&backlight>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&lcd_reset &lcd_enable>;
@@ -668,12 +679,7 @@
 		};
 	};
 
-	unresolved {
-		// now over /sys/class/gpio/
-		pm_enable: pm-enable {
-			rockchip,pins = <RK_GPIO2 0x1d 0x00 &pcfg_pull_default>;
-		};
-
+	power {
 		chg_en: chg-en {
 			rockchip,pins = <RK_GPIO3 0x11 0x00 &pcfg_output_high>;
 		};
@@ -696,6 +702,13 @@
 
 		dc_det_gpio: dc-det-gpio {
 			rockchip,pins = <RK_GPIO0 0x11 0x00 &pcfg_pull_default>;
+		};
+	};
+
+	unresolved {
+		// now over /sys/class/gpio/
+		pm_enable: pm-enable {
+			rockchip,pins = <RK_GPIO2 0x1d 0x00 &pcfg_pull_default>;
 		};
 	};
 };
