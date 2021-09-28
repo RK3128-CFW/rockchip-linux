@@ -163,15 +163,6 @@
 		};
 	};
 
-	usb-control {
-		compatible = "rockchip,rk3126-usb-control";
-		host_drv_gpio = <&gpio3 0x14 0x00>;
-		//  otg_drv_gpio power gpio for OTG
-		rockchip,grf = <&grf>;
-		rockchip,remote_wakeup;
-		rockchip,usb_irq_wakeup;
-	};
-
 	keys {
 		autorepeat;
 		compatible = "gpio-keys";
@@ -294,22 +285,27 @@
 	power-supply {
 		compatible = "wx8-charger";
 
-		pinctrl-0 = <&chg_ok &chg_led &dc_det_gpio &host_drv_gpio1 &host_drv_gpio2>;
+		pinctrl-0 = <&charging_gpio &dc_det_gpio &usb2sys_gpio &boost2usb_gpio>;
 		pinctrl-names = "default";
 
-		//chg_en RK_GPIO3 0x11
-		dc_det_gpio = <&gpio0 0x11 GPIO_ACTIVE_HIGH>;
-		chg_ok_gpio = <&gpio3 0x1a GPIO_ACTIVE_LOW>;
-		led_power_gpio = <&gpio1 0x07 GPIO_ACTIVE_LOW>;
-		//host_drv_gpio1 = <&gpio3 0x15 0x00>;
-		usb_boost_gpio = <&gpio1 0x09 GPIO_ACTIVE_HIGH>;
+		dc_det_gpio = <&gpio0 0x11 GPIO_ACTIVE_HIGH>;	// input, works only when usb2sys_gpio
+		charging_gpio = <&gpio3 0x1a GPIO_ACTIVE_LOW>;	// input, /CHRG output from TP4056
+
+		// both output cannot be active in same time (eg. LOW-LOW or HIGH-HIGH is allowed), beaware loop boost->usb->sys->boost
+		usb2sys_gpio = <&gpio3 0x15 GPIO_ACTIVE_LOW>;	// output, power switch "vcc_usb" -> "vcc_sys" & "vcc_charger"
+		boost2usb_gpio = <&gpio1 0x09 GPIO_ACTIVE_HIGH>;// output, power switch "vcc_booster" -> vcc_usb"
 
 		io-channels = <&saradc 2>;
-		ref_voltage = <3300>; 	// from saradc -> vref-supply -> ?
-		voltage_divider = <200 200>; 	// adc resistot divider
-		discharge_table = <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4205>;
-		charge_table = <3400 3603 3706 3750 3773 3790 3825 4905 3997 4094 4205>;
-		design_capacity = <3000>;
+		ref_voltage = <3300>; 		// mV, from saradc -> vref-supply -> ?
+		voltage_divider = <200 200>; 	// adc resistor divider
+
+		// TODO: calibration to real values
+		discharge_table = <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4170>;	// mV
+		charge_table =    <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4240>;	// mV
+
+		design_capacity = <3000>;	// mAh, battery "GSL475568"
+
+		extcon = <&u2phy>;
 	};
 };
 
@@ -403,9 +399,6 @@
 	};
 
 };
-
-// unknown driver adc-battery { compatible = "rk30-adc-battery"; }
-// unknown driver adc-pot { compatible = "gpio-keys-volume"; }
 
 &dmc {
 	status = "okay";
@@ -680,23 +673,15 @@
 	};
 
 	power {
-		chg_en: chg-en {
-			rockchip,pins = <RK_GPIO3 0x11 0x00 &pcfg_output_high>;
-		};
-
-		chg_ok: chg-ok {
+		charging_gpio: charging-gpio {
 			rockchip,pins = <RK_GPIO3 0x1a 0x00 &pcfg_pull_default>;
 		};
 
-		chg_led: chg-led {
-			rockchip,pins = <RK_GPIO1 0x07 0x00 &pcfg_pull_default>;
-		};
-
-		host_drv_gpio1: host-drv-gpio1 {
+		usb2sys_gpio: usb2sys-gpio {
 			rockchip,pins = <RK_GPIO3 0x15 0x00 &pcfg_pull_default>;
 		};
 
-		host_drv_gpio2: host-drv-gpio2 {
+		boost2usb_gpio: boost2usb-gpio {
 			rockchip,pins = <RK_GPIO1 0x09 0x00 &pcfg_pull_default>;
 		};
 
@@ -707,8 +692,23 @@
 
 	unresolved {
 		// now over /sys/class/gpio/
-		pm_enable: pm-enable {
+		boosters_enable: boosters-enable {
 			rockchip,pins = <RK_GPIO2 0x1d 0x00 &pcfg_pull_default>;
+		};
+
+		// unknown driver compatible = "rockchip,rk3126-usb-control"
+		host_drv_gpio: host-drv-gpio {
+			rockchip,pins = <RK_GPIO3 0x14 0x00 &pcfg_pull_default>;
+		};
+
+		// unknown driver function in original driver compatible = "rockchip,rk3126-usb-control"
+		chg_en: chg-en {
+			rockchip,pins = <RK_GPIO3 0x11 0x00 &pcfg_pull_default>;
+		};
+
+		// unknown driver function in original driver compatible = "rockchip,rk3126-usb-control"
+		led_power_gpio: led-power-gpio {
+			rockchip,pins = <RK_GPIO1 0x07 0x00 &pcfg_pull_default>;
 		};
 	};
 };
