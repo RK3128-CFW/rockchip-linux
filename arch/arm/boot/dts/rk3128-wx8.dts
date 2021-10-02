@@ -5,6 +5,7 @@
  */
 
 #include <dt-bindings/display/drm_mipi_dsi.h>
+#include <dt-bindings/input/rk-input.h>
 
 /dts-v1/;
 
@@ -172,113 +173,115 @@
 		down {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x0b 0x01>;
-			label = "GPIO Key Down";
-			linux,code = <0x6c>;
+			label = "GPIO Dpad Down";
+			linux,code = <BTN_DPAD_DOWN>;
 		};
+
+		// swapped button A-B-X-Y colors and positions probably due to "copyright" reason
 
 		f1 {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x0d 0x01>;
-			label = "GPIO Key A";
-			linux,code = <0x1e>;
+			label = "GPIO Button A - EAST";
+			linux,code = <BTN_EAST>;
 		};
 
 		f2 {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x0b 0x01>;
-			label = "GPIO Key B";
-			linux,code = <0x30>;
+			label = "GPIO Button B - SOUTH";
+			linux,code = <BTN_SOUTH>;
 		};
 
 		f3 {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x0c 0x01>;
-			label = "GPIO Key R";
-			linux,code = <0x13>;
+			label = "GPIO Button TR";
+			linux,code = <BTN_TR>;
 		};
 
 		f4 {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x09 0x01>;
-			label = "GPIO Key L";
-			linux,code = <0x26>;
+			label = "GPIO Button TL";
+			linux,code = <BTN_TL>;
 		};
 
 		f5 {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x08 0x01>;
-			label = "GPIO Key X";
-			linux,code = <0x2d>;
+			label = "GPIO Button X - WEST";
+			linux,code = <BTN_WEST>;
 		};
 
 		f6 {
 			debounce-interval = <20>;
 			gpios = <&gpio3 0x17 0x01>;
-			label = "GPIO Key Y";
-			linux,code = <0x15>;
+			label = "GPIO Button Y - NORTH";
+			linux,code = <BTN_NORTH>;
 		};
 
 		f7 {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x05 0x01>;
-			label = "GPIO Key C";
-			linux,code = <0x2e>;
+			label = "GPIO Button TR2";
+			linux,code = <BTN_TR2>;
 		};
 
 		f8 {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x04 0x01>;
-			label = "GPIO Key Z";
-			linux,code = <0x2c>;
+			label = "GPIO Button TL2";
+			linux,code = <BTN_TL2>;
 		};
 
 		left {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x08 0x01>;
-			label = "GPIO Key Left";
-			linux,code = <0x69>;
+			label = "GPIO Dpad Left";
+			linux,code = <BTN_DPAD_LEFT>;
 		};
 
 		right {
 			debounce-interval = <20>;
 			gpios = <&gpio0 0x0e 0x01>;
-			label = "GPIO Key Right";
-			linux,code = <0x6a>;
+			label = "GPIO Dpad Right";
+			linux,code = <BTN_DPAD_RIGHT>;
 		};
 
 		select {
 			debounce-interval = <20>;
 			gpios = <&gpio3 0x16 0x01>;
-			label = "GPIO Key Select";
-			linux,code = <0x36>;
+			label = "GPIO Button Select";
+			linux,code = <BTN_SELECT>;
 		};
 
 		start {
 			debounce-interval = <20>;
 			gpios = <&gpio3 0x1b 0x01>;
-			label = "GPIO Key Enter";
-			linux,code = <0x1c>;
+			label = "GPIO Button Start";
+			linux,code = <BTN_START>;
 		};
 
 		vol-down-key {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x02 0x01>;
 			label = "GPIO Key Vol Down";
-			linux,code = <0x72>;
+			linux,code = <KEY_VOLUMEDOWN>;
 		};
 
 		vol-up-key {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x01 0x01>;
 			label = "GPIO Key Vol Up";
-			linux,code = <0x73>;
+			linux,code = <KEY_VOLUMEUP>;
 		};
 
 		up {
 			debounce-interval = <20>;
 			gpios = <&gpio1 0x0a 0x01>;
-			label = "GPIO Key Up";
-			linux,code = <0x67>;
+			label = "GPIO Dpad Up";
+			linux,code = <BTN_DPAD_UP>;
 		};
 	};
 
@@ -632,7 +635,7 @@
 	i2c-scl-rising-time-ns = <0x109>;
 
 	i2cjoy@4c {
-		compatible = "wx8joy";
+		compatible = "wx8-joysticks";
 		reg = <0x4c>;
 	};
 };
@@ -701,12 +704,12 @@
 			rockchip,pins = <RK_GPIO3 0x14 0x00 &pcfg_pull_default>;
 		};
 
-		// unknown driver function in original driver compatible = "rockchip,rk3126-usb-control"
+		// unknown driver function in original driver compatible = "rk30-adc-battery"
 		chg_en: chg-en {
 			rockchip,pins = <RK_GPIO3 0x11 0x00 &pcfg_pull_default>;
 		};
 
-		// unknown driver function in original driver compatible = "rockchip,rk3126-usb-control"
+		// unknown driver function in original driver compatible = "rk30-adc-battery"
 		led_power_gpio: led-power-gpio {
 			rockchip,pins = <RK_GPIO1 0x07 0x00 &pcfg_pull_default>;
 		};

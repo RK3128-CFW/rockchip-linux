@@ -14,14 +14,14 @@
 #include <linux/delay.h>
 #include <linux/slab.h>
 #include <linux/fs.h>
-#include <linux/init.h> 
+#include <linux/init.h>
 #include <linux/timer.h>
 #include <linux/platform_device.h>
 #include <linux/types.h>
 #include <linux/input-event-codes.h>
 
-#define DRIVER_DESC "Driver for WX8 joysticks"
-#define MODULE_DEVICE_ALIAS "wx8joy"
+#define DRIVER_DESC "WX8 joysticks"
+#define MODULE_DEVICE_ALIAS "wx8-joysticks"
 
 MODULE_AUTHOR("Martin Cerveny <M.Cerveny@computer.org>");
 MODULE_DESCRIPTION(DRIVER_DESC);
@@ -52,11 +52,12 @@ static const u8 axes[] = {
 #define WX8JOY_RESET	15      // +- from MIDDLE
 #define WX8JOY_SET	30      // +- from MIDDLE
 
-static const u8 keys[] = { 
-	KEY_A, KEY_X, 
-	KEY_B, KEY_Y,
-	KEY_LEFT, KEY_RIGHT,
-	KEY_UP, KEY_DOWN 
+// swapped button A-B-X-Y colors and positions probably due to "copyright" reason
+static const u16 keys[] = {
+	BTN_EAST, BTN_WEST,
+	BTN_SOUTH, BTN_NORTH,
+	BTN_DPAD_LEFT, BTN_DPAD_RIGHT,
+	BTN_DPAD_UP, BTN_DPAD_DOWN
 };
 
 /* timer, 200Hz */
@@ -67,7 +68,7 @@ struct wx8joy_device {
 	struct i2c_client *i2c_client;
 	struct workqueue_struct *wq;
 	struct delayed_work dw;
-        int joy_switch;                 // switch between keys emulation and joysticks
+        int key_emulation;                 // switch between analog joysticks (default) and key emulation
 };
 
 /* main periodic worker */
@@ -86,10 +87,10 @@ static void wx8joy_work(struct work_struct *work)
 		u8 vals[] = {buf[WX8JOY_RH], buf[WX8JOY_RV], buf[WX8JOY_LH], buf[WX8JOY_LV]};
 
 		for(idx=0; idx<sizeof(axes); idx++) {
-                        if (wx8joy->joy_switch)
+                        if (!wx8joy->key_emulation)
         			input_report_abs(wx8joy->input_dev, axes[idx], vals[idx]);
                         else {
-                                if (vals[idx]<WX8JOY_MIDDLE-WX8JOY_SET) 
+                                if (vals[idx]<WX8JOY_MIDDLE-WX8JOY_SET)
                                         input_event(wx8joy->input_dev, EV_KEY, keys[idx*2+0], 1);
                                 else if (vals[idx]>WX8JOY_MIDDLE+WX8JOY_SET)
                                         input_event(wx8joy->input_dev, EV_KEY, keys[idx*2+1], 1);
@@ -102,7 +103,7 @@ static void wx8joy_work(struct work_struct *work)
 		input_sync(wx8joy->input_dev);
 	}
 	
-	WARN_ON(!queue_delayed_work(wx8joy->wq, &wx8joy->dw, msecs_to_jiffies(WX8JOY_INTERVAL))); 
+	WARN_ON(!queue_delayed_work(wx8joy->wq, &wx8joy->dw, msecs_to_jiffies(WX8JOY_INTERVAL)));
 }
 
 /* sysfs mgmt */
@@ -117,7 +118,7 @@ static ssize_t wx8joy_store_key_type(struct device *dev, struct device_attribute
         if (ret)
                 return ret;
 
-        wx8joy->joy_switch = !!val;
+        wx8joy->key_emulation = !!val;
 	return count;
 }
 
@@ -127,7 +128,7 @@ static ssize_t wx8joy_show_key_type(struct device *dev, struct device_attribute 
 	struct wx8joy_device *wx8joy = platform_get_drvdata(pdev);
         int ret;
 
-	ret = scnprintf(buf, PAGE_SIZE - 1, "%d", wx8joy->joy_switch);
+	ret = scnprintf(buf, PAGE_SIZE - 1, "%d", wx8joy->key_emulation);
 	buf[ret++] = '\n';
 	buf[ret] = '\0';
 
@@ -135,12 +136,12 @@ static ssize_t wx8joy_show_key_type(struct device *dev, struct device_attribute 
 }
 
 // switch between keys emulation and joysticks
-static DEVICE_ATTR(key_type, S_IWUSR | S_IRUGO,
+static DEVICE_ATTR(key_emulation, S_IWUSR | S_IRUGO,
 		   wx8joy_show_key_type,
 		   wx8joy_store_key_type);
 
 static struct attribute *wx8joy_attrs[] = {
-	&dev_attr_key_type.attr,
+	&dev_attr_key_emulation.attr,
 	NULL,
 };
 
@@ -168,7 +169,7 @@ static int wx8joy_probe(struct i2c_client *client,
 	}
 	wx8joy->i2c_client = client;
 	wx8joy->input_dev = input_dev;
-        wx8joy->joy_switch = 0;
+        wx8joy->key_emulation = 0;
 
 	wx8joy->wq = create_singlethread_workqueue("wx8joy");
 	if (!wx8joy->wq) {
@@ -195,7 +196,7 @@ static int wx8joy_probe(struct i2c_client *client,
 		input_set_abs_params(input_dev, axes[idx],
 			WX8JOY_MIN_AXIS, WX8JOY_MAX_AXIS, WX8JOY_FUZZ, WX8JOY_FLAT);
 
-	for(idx=0; idx<sizeof(keys); idx++)
+	for(idx=0; idx<sizeof(keys)/sizeof(*keys); idx++)
 		input_set_capability(input_dev, EV_KEY, keys[idx]);
 
 	error = input_register_device(wx8joy->input_dev);
@@ -207,7 +208,7 @@ static int wx8joy_probe(struct i2c_client *client,
 	i2c_set_clientdata(client, wx8joy);
 
 	INIT_DELAYED_WORK(&wx8joy->dw, wx8joy_work);
-	WARN_ON(!queue_delayed_work(wx8joy->wq, &wx8joy->dw, msecs_to_jiffies(WX8JOY_INTERVAL))); 
+	WARN_ON(!queue_delayed_work(wx8joy->wq, &wx8joy->dw, msecs_to_jiffies(WX8JOY_INTERVAL)));
 
 	return 0;
 
