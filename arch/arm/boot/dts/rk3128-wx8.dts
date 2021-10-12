@@ -299,9 +299,8 @@
 		ref_voltage = <3300>; 		// mV, from saradc -> vref-supply -> ?
 		voltage_divider = <200 200>; 	// adc resistor divider
 
-		// TODO: calibration to real values
-		discharge_table = <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4170>;	// mV
-		charge_table =    <3400 3603 3706 3750 3773 3790 3825 3905 3997 4094 4240>;	// mV
+		discharge_table = <3500 3586 3636 3663 3724 3744 3760 3773 3772 3794 3806 3854 3897 3949 3986 4035 4075 4118 4150>;	// mV
+		charge_table =    <3600 3900 3928 3965 3994 4015 4023 4045 4059 4096 4133 4171 4217 4229 4231 4233 4235 4237 4280>;	// mV, without mA cannot determine charging in CV part
 
 		design_capacity = <3000>;	// mAh, battery "GSL475568"
 
