@@ -335,7 +335,7 @@ config JOYSTICK_WX8
 	depends on I2C
 	help
 	  WX8 "secret" I2C chip (4x ADC 8bit) with attached two joysticks (X,Y,R,RZ).
-	  Driver with keys emulation (directions,ABXY) enabled by default.
-	  To switch between keys emulation and joysticks put 0 or 1 to "/sys/.../key_type".
+	  Driver can emulate keys (arrows, ABXY).
+	  To switch between analog joysticks (default) and key emulation put 1 to "/sys/.../key_emulation".
 
 endif
