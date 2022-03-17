@@ -528,6 +528,8 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3128-ps5000.dtb \
 	rk3128-ps7000.dtb \
 	rk3128-powkiddy-a13-rev-ab.dtb \
+	rk3128-powkiddy-a12-rev-c.dtb \
+	rk3128-powkiddy-a12-rev-d.dtb \
 	rk3128h-box.dtb \
 	rk3128h-box-avb.dtb \
 	rk3128h-evb-linux.dtb \
