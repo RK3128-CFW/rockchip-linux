@@ -158,10 +158,9 @@
 	};
 
 	backlight {
-                compatible = "gpio-backlight";
-                gpios = <&gpio2 1 GPIO_ACTIVE_LOW>;
-		default-state = "on";
-		status = "okay";
+		compatible = "pwm-gpio";
+		#pwm-cells = <3>;
+		pwm-gpio = <&gpio2 1 GPIO_ACTIVE_LOW>;
 	};
 
 	chosen {
@@ -173,7 +172,7 @@
 	panel {
 		compatible = "simple-panel";
 		pinctrl-names = "default";
-		pinctrl-0 = <&lcd_bl &lcd_enable>;
+		pinctrl-0 = <&lcd_enable>;
 		bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
 		width-mm = <105>;
 		height-mm = <70>;
@@ -438,10 +437,6 @@
 				<RK_GPIO2 17 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
 				<RK_GPIO2 18 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
 				<RK_GPIO2 19 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
-		};
-
-		lcd_bl: lcd-bl {
-			rockchip,pins = <RK_GPIO2 1 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
 		};
 
 		lcd_enable: lcd-enable {
