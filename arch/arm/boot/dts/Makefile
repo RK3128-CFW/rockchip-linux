@@ -524,6 +524,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3126-bnd-m88-emmc.dtb \
 	rk3126-evb.dtb \
 	rk3126-linux.dtb \
+	rk3126-m17.dtb \
 	rk3128-fireprime.dtb \
 	rk3128-ps5000.dtb \
 	rk3128-ps7000.dtb \

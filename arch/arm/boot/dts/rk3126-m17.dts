@@ -1,0 +1,575 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2019 Fuzhou Rockchip Electronics Co., Ltd
+ */
+
+/dts-v1/;
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/pinctrl/rockchip.h>
+#include <dt-bindings/pwm/pwm.h>
+#include "rk3126.dtsi"
+#include "rk312x-android.dtsi"
+
+/ {
+	model = "Rockchip RK3126 Linux board";
+	compatible = "rockchip,rk3126";
+
+	0gpio-keys {
+		status = "okay";
+		compatible = "gpio-keys";
+		autorepeat;
+		pinctrl-names = "default";
+		pinctrl-0 = <&game_keys>;
+
+		up_key {
+			gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_UP>;
+			label = "GPIO Key Up";
+			debounce-interval = <20>;
+		};
+
+		down_key {
+			gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_DOWN>;
+			label = "GPIO Key Down";
+			debounce-interval = <20>;
+		};
+
+		left_key {
+			gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_LEFT>;
+			label = "GPIO Key Left";
+			debounce-interval = <20>;
+		};
+
+		right_key {
+			gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RIGHT>;
+			label = "GPIO Key Right";
+			debounce-interval = <20>;
+		};
+
+		y_key {
+			gpios = <&gpio2 4 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_Y>;
+			label = "GPIO Key Y";
+			debounce-interval = <20>;
+		};
+
+		a_key {
+			gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_A>;
+			label = "GPIO Key A";
+			debounce-interval = <20>;
+		};
+
+		x_key {
+			gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_X>;
+			label = "GPIO Key X";
+			debounce-interval = <20>;
+		};
+
+		b_key {
+			gpios = <&gpio3 17 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_B>;
+			label = "GPIO Key B";
+			debounce-interval = <20>;
+		};
+
+		l_key {
+			gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_L>;
+			label = "GPIO Key L";
+			debounce-interval = <20>;
+		};
+
+		r_key {
+			gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_R>;
+			label = "GPIO Key R";
+			debounce-interval = <20>;
+		};
+
+		start_key {
+			gpios = <&gpio2 2 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_ENTER>;
+			label = "GPIO Key START";
+			debounce-interval = <20>;
+		};
+
+		select_key {
+			gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RIGHTSHIFT>;
+			label = "GPIO Key SELECT";
+			debounce-interval = <20>;
+		};
+
+		r2_key {
+			gpios = <&gpio3 11 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_C>;
+			label = "GPIO Key C";
+			debounce-interval = <20>;
+		};
+
+		l2_key {
+			gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_Z>;
+			label = "GPIO Key Z";
+			debounce-interval = <20>;
+		};
+	};
+
+	adc-battery {
+		status = "okay";
+		compatible = "rk30-adc-battery";
+		io-channels = <&saradc 0x00>;
+		auto_calibration = <0>;
+		ref_voltage = <3300>;
+		bat_table = <0 0 0 0 200 200 3460 3580 3650 3713 3748 3778 3813 3886 3913 3990 4060 3630 3844 3876 3907 3930 3948 3980 4047 4084 4130 4200>;
+		is_usb_charge = <1>;
+	};
+
+	adc-keys {
+		compatible = "adc-keys";
+		io-channels = <&saradc 2>;
+		io-channel-names = "buttons";
+		poll-interval = <100>;
+		keyup-threshold-microvolt = <3300000>;
+
+		vol-down {
+			label = "Volume Down";
+			linux,code = <KEY_VOLUMEDOWN>;
+			press-threshold-microvolt = <100000>;
+		};
+
+		vol-up {
+			label = "Volume Up";
+			linux,code = <KEY_VOLUMEUP>;
+			press-threshold-microvolt = <1600000>;
+		};
+
+		mode_key {
+			label = "mode";
+			linux,code = <KEY_END>;
+			press-threshold-microvolt = <400000>;
+		};
+	};
+
+	backlight {
+		compatible = "pwm-gpio";
+		#pwm-cells = <3>;
+		pwm-gpio = <&gpio2 1 GPIO_ACTIVE_LOW>;
+	};
+
+	chosen {
+		/*stdout-path = &uart2;
+                bootargs = "earlycon=tty0 rootwait console=ttyS2,115200n8 swiotlb=1 root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9";*/
+                bootargs = "root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait";
+	};
+
+	panel {
+		compatible = "simple-panel";
+		pinctrl-names = "default";
+		pinctrl-0 = <&lcd_enable>;
+		bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
+		width-mm = <105>;
+		height-mm = <70>;
+		enable-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>, <&gpio2 1 GPIO_ACTIVE_LOW>;
+		reset-delay-ms = <60>;
+		enable-delay-ms = <100>;
+		prepare-delay-ms = <100>;
+		rockchip,data-width = <18>;
+		rockchip,output = "rgb";
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+				clock-frequency = <16000000>;
+				hactive = <480>;
+				vactive = <273>;
+				hback-porch = <10>;
+				hfront-porch = <10>;
+				vback-porch = <31>;
+				vfront-porch = <2>;
+				hsync-len = <41>;
+				vsync-len = <28>;
+				hsync-active = <0>;
+				vsync-active = <1>;
+				de-active = <0>;
+				pixelclk-active = <1>;
+			};
+
+			timing2: timing2 {
+				clock-frequency = <12000000>;
+				hactive = <480>;
+				hback-porch = <20>;
+				hfront-porch = <20>;
+				hsync-len = <40>;
+				vactive = <272>;
+				vback-porch = <15>;
+				vfront-porch = <24>;
+				vsync-len = <16>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <1>;
+			};
+
+			timing1: timing1 {
+				clock-frequency = <12000000>;
+				hactive = <480>;
+				hback-porch = <20>;
+				hfront-porch = <20>;
+				hsync-len = <41>;
+				vactive = <272>;
+				vback-porch = <1>;
+				vfront-porch = <10>;
+				vsync-len = <1>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <0>;
+				pixelclk-active = <0>;
+			};
+		};
+
+		port {
+			panel_in_rgb: endpoint {
+				remote-endpoint = <&rgb_out_panel>;
+			};
+		};
+	};
+
+	rockchip_headset {
+		compatible = "rockchip_headset";
+		headset_gpio = <&gpio0 9 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
+
+	sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,name = "rockchip,rk312x";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s_2ch>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&codec>;
+		};
+	};
+
+	vcc50_boost: vcc50-boost {
+		compatible = "regulator-fixed";
+		gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+		regulator-name = "vcc50_boost";
+		enable-active-high;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		regulator-boot-on;
+		status = "okay";
+	};
+
+	vccadc_ref: vccadc-ref {
+		compatible = "regulator-fixed";
+		regulator-name = "SARADC_AVDD33";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	vdd_arm: vdd-arm-regulator {
+		compatible = "pwm-regulator";
+		rockchip,pwm_id = <0>;
+		rockchip,pwm_voltage = <1100000>;
+		pwms = <&pwm0 0 5000 GPIO_ACTIVE_LOW>;
+		regulator-name = "vdd_arm";
+		regulator-min-microvolt = <950000>;
+		regulator-max-microvolt = <1500000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	vcc_io: vcc-io {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_io";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	vdd_log: vdd-log-regulator {
+		compatible = "pwm-regulator";
+		rockchip,pwm_id = <1>;
+		rockchip,pwm_voltage = <1100000>;
+		pwms = <&pwm1 0 5000 GPIO_ACTIVE_LOW>;
+		regulator-name = "vdd_log";
+		regulator-min-microvolt = <910000>;
+		regulator-max-microvolt = <1300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	vcc_sys: vcc-sys {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_sys";
+		regulator-min-microvolt = <4000000>;
+		regulator-max-microvolt = <4000000>;
+		regulator-always-on;
+	};
+
+	xin32k: xin32k {
+		compatible = "fixed-clock";
+		clock-frequency = <32768>;
+		clock-output-names = "xin32k";
+		#clock-cells = <0>;
+	};
+};
+
+&codec {
+	status = "okay";
+	#sound-dai-cells = <0>;
+	hp-ctl-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+	spk-ctl-gpios = <&gpio1 8 GPIO_ACTIVE_HIGH>;
+	spk-mute-delay = <5>;
+	hp-mute-delay = <5>;
+	is_rk3128 = <0>;
+	spk_volume = <23>;
+	hp_volume = <25>;
+	capture_volume = <26>;
+	gpio_debug = <0>;
+	codec_hp_det = <0>;
+};
+
+&cpu0 {
+	cpu-supply = <&vdd_arm>;
+};
+
+&dmc {
+	system-status-freq = <1 456000>;
+	center-supply = <&vdd_log>;
+};
+
+&emmc {
+	status = "okay";
+	cap-mmc-highspeed;
+	supports-emmc;
+	disable-wp;
+	non-removable;
+};
+
+&gpu {
+	status = "okay";
+	mali-supply = <&vdd_log>;
+};
+
+&hevc {
+	status = "okay";
+};
+
+&hevc_mmu {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+	i2c-scl-rising-time-ns = <265>;
+	i2c-scl-falling-time-ns = <260>;
+	clock-frequency = <50000>;
+
+	checki2c@43 {
+		compatible = "i2c0";
+		reg = <0x43>;
+	};
+};
+
+&i2s_2ch {
+	#sound-dai-cells = <0>;
+	status = "okay";
+};
+
+&iep {
+	status = "okay";
+};
+
+&iep_mmu {
+	status = "okay";
+};
+
+&nandc {
+	status = "okay";
+};
+
+&pinctrl {
+	lcdc {
+		lcdc_rgb_pins: lcdc-rgb-pins {
+			rockchip,pins =
+				<RK_GPIO2 8 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 9 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 10 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 11 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 12 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 13 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 14 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 15 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 16 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 17 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 18 GPIO_ACTIVE_LOW &pcfg_pull_none>,
+				<RK_GPIO2 19 GPIO_ACTIVE_LOW &pcfg_pull_none>;
+		};
+
+		lcdc_sleep_pins: lcdc-sleep-pins {
+			rockchip,pins =
+				<RK_GPIO2 8 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 9 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 10 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 11 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 12 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 13 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 14 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 15 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 16 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 17 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 18 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+				<RK_GPIO2 19 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
+		};
+
+		lcd_enable: lcd-enable {
+			rockchip,pins = <RK_GPIO1 11 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
+		};
+	};
+
+	buttons {
+		game_keys: game-keys {
+			rockchip,pins =
+			<RK_GPIO2 4 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO0 3 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO2 6 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO3 17 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO1 2 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO1 4 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO2 21 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO2 20 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO1 0 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO1 1 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO2 0 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO2 2 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO0 2 GPIO_ACTIVE_HIGH &pcfg_pull_none>,
+			<RK_GPIO3 11 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
+		};
+	};
+};
+
+&pwm0 {
+	status = "okay";
+};
+
+&pwm1 {
+	status = "okay";
+};
+
+&rga {
+	status = "okay";
+};
+
+&rgb {
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0x00>;
+
+			endpoint {
+				remote-endpoint = <&vop_out_rgb>;
+				status = "okay";
+			};
+		};
+
+		port@1 {
+			reg = <0x01>;
+
+			rgb_out_panel: endpoint {
+				remote-endpoint = <&panel_in_rgb>;
+			};
+		};
+	};
+};
+
+&route_rgb{
+	status = "okay";
+};
+
+&saradc {
+	status = "okay";
+	vref-supply = <&vccadc_ref>;
+};
+
+&sdmmc {
+	status = "okay";
+	clock-frequency = <150000000>;
+	supports-highspeed;
+	cap-sd-highspeed;
+	supports-emmc;
+	supports-sd;
+	card-detect-delay = <800>;
+	ignore-pm-notify;
+	keep-power-in-suspend;
+	cd-gpios = <&gpio2 3 GPIO_ACTIVE_LOW>;
+};
+
+&tsadc {
+	status = "okay";
+};
+
+&u2phy {
+	status = "okay";
+
+	u2phy_otg: otg-port {
+		status = "okay";
+	};
+
+	u2phy_host: host-port {
+		status = "okay";
+	};
+};
+
+&usb_host_ehci {
+	status = "okay";
+};
+
+&usb_host_ohci {
+	status = "okay";
+};
+
+&usb_otg {
+	status = "okay";
+};
+
+&vop {
+	status = "okay";
+};
+
+&vop_mmu {
+	status = "okay";
+	rockchip,skip-mmu-read;
+};
+
+&vpu {
+	status = "okay";
+};
+
+&vpu_combo {
+	status = "okay";
+};
+
+&vpu_mmu {
+	status = "okay";
+};
