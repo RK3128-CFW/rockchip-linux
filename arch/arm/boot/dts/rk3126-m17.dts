@@ -9,126 +9,116 @@
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/pwm/pwm.h>
 #include "rk3126.dtsi"
-#include "rk312x-android.dtsi"
 
 / {
 	model = "Rockchip RK3126 Linux board";
 	compatible = "rockchip,rk3126";
 
-	0gpio-keys {
+	m17_gamepad {
 		status = "okay";
 		compatible = "gpio-keys";
 		autorepeat;
 		pinctrl-names = "default";
 		pinctrl-0 = <&game_keys>;
+		evbit = <1>;
 
 		up_key {
 			gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_UP>;
+			linux,code = <BTN_DPAD_UP>;
 			label = "GPIO Key Up";
 			debounce-interval = <20>;
 		};
 
 		down_key {
 			gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_DOWN>;
+			linux,code = <BTN_DPAD_DOWN>;
 			label = "GPIO Key Down";
 			debounce-interval = <20>;
 		};
 
 		left_key {
 			gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_LEFT>;
+			linux,code = <BTN_DPAD_LEFT>;
 			label = "GPIO Key Left";
 			debounce-interval = <20>;
 		};
 
 		right_key {
 			gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_RIGHT>;
+			linux,code = <BTN_DPAD_RIGHT>;
 			label = "GPIO Key Right";
 			debounce-interval = <20>;
 		};
 
 		y_key {
 			gpios = <&gpio2 4 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_Y>;
+			linux,code = <BTN_Y>;
 			label = "GPIO Key Y";
 			debounce-interval = <20>;
 		};
 
 		a_key {
 			gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_A>;
+			linux,code = <BTN_A>;
 			label = "GPIO Key A";
 			debounce-interval = <20>;
 		};
 
 		x_key {
 			gpios = <&gpio2 6 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_X>;
+			linux,code = <BTN_X>;
 			label = "GPIO Key X";
 			debounce-interval = <20>;
 		};
 
 		b_key {
 			gpios = <&gpio3 17 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_B>;
+			linux,code = <BTN_B>;
 			label = "GPIO Key B";
 			debounce-interval = <20>;
 		};
 
 		l_key {
 			gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_L>;
+			linux,code = <BTN_TL>;
 			label = "GPIO Key L";
 			debounce-interval = <20>;
 		};
 
 		r_key {
 			gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_R>;
+			linux,code = <BTN_TR>;
 			label = "GPIO Key R";
 			debounce-interval = <20>;
 		};
 
 		start_key {
 			gpios = <&gpio2 2 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_ENTER>;
+			linux,code = <BTN_START>;
 			label = "GPIO Key START";
 			debounce-interval = <20>;
 		};
 
 		select_key {
 			gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_RIGHTSHIFT>;
+			linux,code = <BTN_SELECT>;
 			label = "GPIO Key SELECT";
 			debounce-interval = <20>;
 		};
 
 		r2_key {
 			gpios = <&gpio3 11 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_C>;
+			linux,code = <BTN_TR2>;
 			label = "GPIO Key C";
 			debounce-interval = <20>;
 		};
 
 		l2_key {
 			gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
-			linux,code = <KEY_Z>;
+			linux,code = <BTN_TL2>;
 			label = "GPIO Key Z";
 			debounce-interval = <20>;
 		};
-	};
-
-	adc-battery {
-		status = "okay";
-		compatible = "rk30-adc-battery";
-		io-channels = <&saradc 0x00>;
-		auto_calibration = <0>;
-		ref_voltage = <3300>;
-		bat_table = <0 0 0 0 200 200 3460 3580 3650 3713 3748 3778 3813 3886 3913 3990 4060 3630 3844 3876 3907 3930 3948 3980 4047 4084 4130 4200>;
-		is_usb_charge = <1>;
 	};
 
 	adc-keys {
@@ -167,6 +157,18 @@
 		/*stdout-path = &uart2;
                 bootargs = "earlycon=tty0 rootwait console=ttyS2,115200n8 swiotlb=1 root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9";*/
                 bootargs = "root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait";
+	};
+
+	fiq-debugger {
+		compatible = "rockchip,fiq-debugger";
+		rockchip,serial-id = <2>;
+		rockchip,signal-irq = <159>;
+		rockchip,wake-irq = <0>;
+		/* If enable uart uses irq instead of fiq */
+		rockchip,irq-mode-enable = <0>;
+		rockchip,baudrate = <115200>;  /* Only 115200 and 1500000 */
+		interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_LOW>;
+		status = "okay";
 	};
 
 	panel {
@@ -239,6 +241,42 @@
 			panel_in_rgb: endpoint {
 				remote-endpoint = <&rgb_out_panel>;
 			};
+		};
+	};
+
+	power-supply {
+		compatible = "wx8-charger";
+
+		pinctrl-0 = <&charging_gpio &dc_det_gpio &usb2sys_gpio &boost2usb_gpio>;
+		pinctrl-names = "default";
+
+		dc_det_gpio = <&gpio0 17 GPIO_ACTIVE_HIGH>;	// input, works only when usb2sys_gpio
+		charging_gpio = <&gpio3 26 GPIO_ACTIVE_LOW>;	// input, /CHRG output from TP4056
+
+		// both output cannot be active in same time (eg. LOW-LOW or HIGH-HIGH is allowed), beaware loop boost->usb->sys->boost
+		usb2sys_gpio = <&gpio3 21 GPIO_ACTIVE_LOW>;	// output, power switch "vcc_usb" -> "vcc_sys" & "vcc_charger"
+		boost2usb_gpio = <&gpio1 9 GPIO_ACTIVE_HIGH>;// output, power switch "vcc_booster" -> vcc_usb"
+
+		io-channels = <&saradc 0>;
+		ref_voltage = <3300>;
+		voltage_divider = <200 200>;
+
+		discharge_table = <3460 3580 3650 3713 3748 3778 3813 3886 3913 3990 4060>;
+		charge_table =    <3630 3844 3876 3907 3930 3948 3980 4047 4084 4130 4200>;
+
+		design_capacity = <1370>;
+
+		extcon = <&u2phy>;
+	};
+
+	reserved-memory {
+		#address-cells = <0x01>;
+		#size-cells = <0x01>;
+		ranges;
+
+		drm_logo: drm-logo@00000000 {
+			compatible = "rockchip,drm-logo";
+			reg = <0x00 0x00>;
 		};
 	};
 
@@ -350,7 +388,25 @@
 	cpu-supply = <&vdd_arm>;
 };
 
+&dfi {
+	status = "okay";
+};
+
+&display_subsystem {
+	logo-memory-region = <&drm_logo>;
+	status = "okay";
+
+	route {
+		route_rgb: route-rgb {
+			status = "okay";
+			connect = <&vop_out_rgb>;
+		};
+	};
+};
+
 &dmc {
+	vop-dclk-mode = <1>;
+	status = "okay";
 	system-status-freq = <1 456000>;
 	center-supply = <&vdd_log>;
 };
@@ -463,6 +519,24 @@
 			<RK_GPIO3 11 GPIO_ACTIVE_HIGH &pcfg_pull_none>;
 		};
 	};
+
+	power {
+		charging_gpio: charging-gpio {
+			rockchip,pins = <RK_GPIO3 26 GPIO_ACTIVE_HIGH &pcfg_pull_default>;
+		};
+
+		usb2sys_gpio: usb2sys-gpio {
+			rockchip,pins = <RK_GPIO3 21 GPIO_ACTIVE_HIGH &pcfg_pull_default>;
+		};
+
+		boost2usb_gpio: boost2usb-gpio {
+			rockchip,pins = <RK_GPIO1 9 GPIO_ACTIVE_HIGH &pcfg_pull_default>;
+		};
+
+		dc_det_gpio: dc-det-gpio {
+			rockchip,pins = <RK_GPIO0 17 GPIO_ACTIVE_HIGH &pcfg_pull_default>;
+		};
+	};
 };
 
 &pwm0 {
@@ -525,6 +599,20 @@
 	cd-gpios = <&gpio2 3 GPIO_ACTIVE_LOW>;
 };
 
+&sfc {
+	status = "okay";
+};
+
+&soc_thermal {
+	trips {
+		soc_crit: soc-crit {
+			hysteresis = <2000>;
+			temperature = <115000>;
+			type = "critical";
+		};
+	};
+};
+
 &tsadc {
 	status = "okay";
 };
@@ -553,13 +641,16 @@
 	status = "okay";
 };
 
+&video_phy {
+	status = "okay";
+};
+
 &vop {
 	status = "okay";
 };
 
 &vop_mmu {
 	status = "okay";
-	rockchip,skip-mmu-read;
 };
 
 &vpu {

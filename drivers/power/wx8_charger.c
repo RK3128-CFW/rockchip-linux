@@ -37,7 +37,7 @@ MODULE_AUTHOR("M.Cerveny@computer.org");
 // config constatnts
 
 #define WX8_RECHECK_CHARGER	(60*60*1000)	// [ms] recheck charger, when running from battery and usb device is connected
-#define WX8_UPDATE_STATUS	(500)		// [ms] repeatedly updates battery status
+#define WX8_UPDATE_STATUS	(2000)		// [ms] repeatedly updates battery status
 
 // data structures
 
